@@ -73,6 +73,8 @@
     "factory-girl": "^5.0.4",
     "jwt-simple": "^0.5.1",
     "pg": "^7.4.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5",
     "sequelize": "^5.10.1",
     "swagger-ui-express": "^4.0.7",
     "umzug": "^2.1.0"
