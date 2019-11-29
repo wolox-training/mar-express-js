@@ -1,13 +1,39 @@
 const rp = require('request-promise');
+const util = require('util');
 
-module.exports.listAlbums = () => {
-  rp('https://jsonplaceholder.typicode.com/albums')
-    .then(response => console.log(response))
-    .catch(err => console.log(err.message));
+const config = require('../../config/index');
+const logger = require('../logger');
+const error = require('../errors');
+
+const { url } = config;
+const { apiAlbumsError } = error;
+
+exports.listAlbums = () => {
+  rp({
+    uri: `${url}/albums`,
+    resolveWithFullResponse: true
+  })
+    .then(response => {
+      logger.info(response.body);
+      return response;
+    })
+    .catch(err => {
+      logger.error(util.inspect(err));
+      throw apiAlbumsError(err.message);
+    });
 };
 
-module.exports.listAlbumPhotos = album_id => {
-  rp(`https://jsonplaceholder.typicode.com/photos?albumId=${album_id}`)
-    .then(response => console.log(response))
-    .catch(err => console.log(err.message));
+exports.listAlbumPhotos = albumId => {
+  rp({
+    uri: `${url}/photos?albumId=${albumId}`,
+    resolveWithFullResponse: true
+  })
+    .then(response => {
+      logger.info(response.body);
+      return response;
+    })
+    .catch(err => {
+      logger.error(util.inspect(err));
+      throw apiAlbumsError(err.message);
+    });
 };
