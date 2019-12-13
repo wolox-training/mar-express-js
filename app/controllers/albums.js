@@ -1,7 +1,6 @@
 const albumsService = require('../services/albums');
 
-const { listAlbums } = albumsService;
-const { listAlbumPhotos } = albumsService;
+const { listAlbums, listAlbumPhotos } = albumsService;
 
 exports.getAlbums = (req, res, next) =>
   listAlbums()
