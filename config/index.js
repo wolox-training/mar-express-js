@@ -46,6 +46,9 @@ const config = {
     },
     albums: {
       url: 'https://jsonplaceholder.typicode.com'
+    },
+    bcrypt: {
+      saltRounds: 10
     }
   }
 };
