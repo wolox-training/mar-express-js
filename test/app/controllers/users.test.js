@@ -51,7 +51,7 @@ describe('POST /users', () => {
             email: '',
             password: ''
           });
-        expect(res.statusCode).toEqual(500);
+        expect(res.statusCode).toEqual(400);
         expect(res.body.message).toEqual(failureMessage);
         expect(res.body.internal_code).toEqual(internalCode);
       });
@@ -70,7 +70,7 @@ describe('POST /users', () => {
             email: user.email,
             password: user.password
           });
-        expect(res.statusCode).toEqual(500);
+        expect(res.statusCode).toEqual(400);
         expect(res.body.message).toEqual(failureMessage);
         expect(res.body.internal_code).toEqual(internalCode);
       });
@@ -89,7 +89,7 @@ describe('POST /users', () => {
             email: user.email,
             password: user.password
           });
-        expect(res.statusCode).toEqual(500);
+        expect(res.statusCode).toEqual(400);
         expect(res.body.message).toEqual(failureMessage);
         expect(res.body.internal_code).toEqual(internalCode);
       });
@@ -108,7 +108,7 @@ describe('POST /users', () => {
             email: user.email,
             password: user.password
           });
-        expect(res.statusCode).toEqual(500);
+        expect(res.statusCode).toEqual(400);
         expect(res.body.message).toEqual(failureMessage);
         expect(res.body.internal_code).toEqual(internalCode);
       });
