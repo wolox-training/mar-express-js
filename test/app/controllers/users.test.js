@@ -39,10 +39,17 @@ describe('POST /users', () => {
   });
 
   describe('Failure cases', () => {
-    const failureMessage = 'Invalid params!';
     const internalCode = 'user_creation_error';
     describe('With empty params', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = [
+          { first_name: "firstName can't be blank" },
+          { last_name: "lastName can't be blank" },
+          { email: 'Invalid value' },
+          { email: 'you may only use email addresses from wolox domain' },
+          { password: 'Password should be at least 8 characters long' },
+          { password: 'Password should be alphanumeric' }
+        ];
         const res = await request(app)
           .post('/users')
           .send({
@@ -59,6 +66,7 @@ describe('POST /users', () => {
 
     describe('With wrong email domain', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = [{ email: 'you may only use email addresses from wolox domain' }];
         const user = await factory.build('users').then(dummy => dummy.dataValues);
         user.password = 'passWord58';
         user.email += '@gmail.com.ar';
@@ -78,6 +86,7 @@ describe('POST /users', () => {
 
     describe('With non alphanumeric password', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = [{ password: 'Password should be alphanumeric' }];
         const user = await factory.build('users').then(dummy => dummy.dataValues);
         user.password = '_pass-Word_';
         user.email += '@wolox.com.ar';
@@ -97,6 +106,7 @@ describe('POST /users', () => {
 
     describe('With too short password', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = [{ password: 'Password should be at least 8 characters long' }];
         const user = await factory.build('users').then(dummy => dummy.dataValues);
         user.password = 'pass';
         user.email += '@wolox.com.ar';

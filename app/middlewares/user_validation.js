@@ -6,11 +6,11 @@ const { userCreationError } = error;
 
 exports.userValidationRules = () => [
   checkSchema({
-    firstName: {
+    first_name: {
       notEmpty: true,
       errorMessage: "firstName can't be blank"
     },
-    lastName: {
+    last_name: {
       notEmpty: true,
       errorMessage: "lastName can't be blank"
     },
