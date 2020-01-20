@@ -74,6 +74,7 @@
     "express-wolox-logger": "1.1.0",
     "factory-girl": "^5.0.4",
     "is-alphanumeric": "^1.0.0",
+    "jsonwebtoken": "^8.5.1",
     "jwt-simple": "^0.5.1",
     "pg": "^7.14.0",
     "request": "^2.88.0",
