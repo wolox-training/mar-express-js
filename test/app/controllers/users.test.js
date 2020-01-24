@@ -3,6 +3,7 @@ const { factory } = require('factory-girl');
 
 const app = require('../../../app');
 const { factoryByModel } = require('../../factory/factory_by_models');
+const { userSignUpErrorsMessages } = require('../../errors/user');
 
 factoryByModel('users');
 
@@ -39,10 +40,10 @@ describe('POST /users', () => {
   });
 
   describe('Failure cases', () => {
-    const failureMessage = 'Invalid params!';
     const internalCode = 'user_creation_error';
     describe('With empty params', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = userSignUpErrorsMessages.emptyBodyErrorMessage;
         const res = await request(app)
           .post('/users')
           .send({
@@ -59,6 +60,7 @@ describe('POST /users', () => {
 
     describe('With wrong email domain', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = userSignUpErrorsMessages.wrongEmailErrorMessage;
         const user = await factory.build('users').then(dummy => dummy.dataValues);
         user.password = 'passWord58';
         user.email += '@gmail.com.ar';
@@ -78,6 +80,7 @@ describe('POST /users', () => {
 
     describe('With non alphanumeric password', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = userSignUpErrorsMessages.wrongPasswordErrorMessage;
         const user = await factory.build('users').then(dummy => dummy.dataValues);
         user.password = '_pass-Word_';
         user.email += '@wolox.com.ar';
@@ -97,6 +100,7 @@ describe('POST /users', () => {
 
     describe('With too short password', () => {
       it("shouldn't create a new user", async () => {
+        const failureMessage = userSignUpErrorsMessages.wrongPasswordErrorMessage;
         const user = await factory.build('users').then(dummy => dummy.dataValues);
         user.password = 'pass';
         user.email += '@wolox.com.ar';
