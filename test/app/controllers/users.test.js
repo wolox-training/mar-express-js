@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const app = require('../../../app');
 const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
-const { userSignUpErrorsMessages } = require('../../errors/user');
+const { userSignUpErrorsMessages, userSignInErrorsMessages } = require('../../errors/user');
 
 const { saltRounds } = config.common.bcrypt;
 
@@ -152,7 +152,7 @@ describe('POST /users', () => {
 describe('POST /users/sessions', () => {
   describe('Success case', () => {
     describe('With valid params', () => {
-      it('Logs in a registered user', async () => {
+      it('should log in a registered user', async () => {
         await factory.create('users', {
           password: bcrypt.hash('passWord58', saltRounds),
           email: 'fake@wolox.com.ar'
@@ -173,13 +173,8 @@ describe('POST /users/sessions', () => {
   describe('Failure cases', () => {
     const validationErrorCode = 'validation_error';
     describe('With empty params', () => {
-      it('does not log any user', async () => {
-        const failureMessage = [
-          { email: 'Invalid value' },
-          { email: 'you may only use email addresses from wolox domain' },
-          { password: 'Password should be at least 8 characters long' },
-          { password: 'Password should be alphanumeric' }
-        ];
+      it("shouldn't log any user", async () => {
+        const failureMessage = userSignInErrorsMessages.emptyBodyErrorMessage;
         await factory.create('users', {
           password: bcrypt.hash('passWord58', saltRounds),
           email: 'fake@wolox.com.ar'
@@ -198,8 +193,8 @@ describe('POST /users/sessions', () => {
     });
 
     describe('With invalid email', () => {
-      it('Does not log any user', async () => {
-        const failureMessage = [{ email: 'you may only use email addresses from wolox domain' }];
+      it("shouldn't log any user", async () => {
+        const failureMessage = userSignInErrorsMessages.wrongEmailErrorMessage;
         await factory.create('users', {
           password: bcrypt.hash('passWord58', saltRounds),
           email: 'fake@wolox.com.ar'
@@ -219,7 +214,7 @@ describe('POST /users/sessions', () => {
 
     describe('With wrong password', () => {
       const userLoginErrorCode = 'user_login_error';
-      it('Does not log any user', async () => {
+      it("shouldn't log any user", async () => {
         const failureMessage = 'Ivalid password for user: fake@wolox.com.ar';
         await factory.create('users', {
           password: bcrypt.hash('passWord58', saltRounds),

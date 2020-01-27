@@ -42,7 +42,10 @@ exports.signInUser = (req, res, next) =>
         .compare(req.body.password, user.password)
         .then(result => {
           if (result) {
-            const token = jwt.sign({ id: user.id, first_name: user.firstName }, process.env.TOKEN_SECRET);
+            const token = jwt.sign(
+              { id: user.id, name: [user.firstName, user.lastName].join(' ') },
+              process.env.TOKEN_SECRET
+            );
             res.header('auth-token', token);
             res.status(200).send(token);
           } else {
