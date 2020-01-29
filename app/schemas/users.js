@@ -3,7 +3,7 @@ const {
   lastNameErrorMessage,
   emailErrorMessage,
   passwordErrorMessage
-} = require('./error_messages').errorMessages;
+} = require('./error_messages').validationErrorMessages;
 
 exports.userSignUpSchema = {
   first_name: {

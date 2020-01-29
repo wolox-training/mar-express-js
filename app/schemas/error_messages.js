@@ -1,4 +1,4 @@
-exports.errorMessages = {
+exports.validationErrorMessages = {
   firstNameErrorMessage: "The key 'first_name' it's required, must be of type 'string' and can't be blank",
   lastNameErrorMessage: "The key 'last_name' it's required, must be of type 'string' and can't be blank",
   emailErrorMessage:

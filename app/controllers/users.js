@@ -2,10 +2,9 @@ const util = require('util');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const User = require('../models').users;
 const logger = require('../logger');
 const error = require('../errors');
-const { hashPassword, findByEmail } = require('../services/users');
+const { hashPassword, findByEmail, createUser } = require('../services/users');
 
 const { userCreationError, userLoginError } = error;
 
@@ -18,10 +17,10 @@ exports.signUpUser = (req, res, next) => {
       } else {
         return hashPassword(password)
           .then(hashedPassword =>
-            User.create({ firstName, lastName, email, password: hashedPassword })
+            createUser(firstName, lastName, email, hashedPassword)
               .then(user => {
                 logger.info(`New user created for: ${firstName} ${lastName}`);
-                return user;
+                res.status(201).send(user);
               })
               .catch(err => {
                 logger.error(util.inspect(err));
@@ -43,10 +42,9 @@ exports.signInUser = (req, res, next) =>
         .then(result => {
           if (result) {
             const token = jwt.sign(
-              { id: user.id, name: [user.firstName, user.lastName].join(' ') },
+              { id: user.id, firstName: user.firstName, lastName: user.lastName },
               process.env.TOKEN_SECRET
             );
-            res.header('auth-token', token);
             res.status(200).send(token);
           } else {
             res.status(401).send(userLoginError(`Ivalid password for user: ${user.email}`));

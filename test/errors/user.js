@@ -3,7 +3,7 @@ const {
   lastNameErrorMessage,
   emailErrorMessage,
   passwordErrorMessage
-} = require('../../app/schemas/error_messages').errorMessages;
+} = require('../../app/schemas/error_messages').validationErrorMessages;
 
 exports.userSignUpErrorsMessages = {
   emptyBodyErrorMessage: [
@@ -27,5 +27,6 @@ exports.userSignInErrorsMessages = {
     { password: passwordErrorMessage },
     { password: passwordErrorMessage }
   ],
-  wrongEmailErrorMessage: [{ email: emailErrorMessage }]
+  wrongEmailErrorMessage: [{ email: emailErrorMessage }],
+  invalidPasswordErrorMessage: 'Ivalid password for user: fake@wolox.com.ar'
 };
