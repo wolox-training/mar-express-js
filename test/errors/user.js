@@ -10,23 +10,17 @@ exports.userSignUpErrorsMessages = {
     { first_name: firstNameErrorMessage },
     { last_name: lastNameErrorMessage },
     { email: emailErrorMessage },
-    { email: emailErrorMessage },
-    { password: passwordErrorMessage },
-    { password: passwordErrorMessage },
     { password: passwordErrorMessage }
   ],
-  wrongEmailErrorMessage: [{ email: emailErrorMessage }],
-  wrongPasswordErrorMessage: [{ password: passwordErrorMessage }]
+  invalidEmailErrorMessage: [{ email: emailErrorMessage }],
+  invalidPasswordErrorMessage: [{ password: passwordErrorMessage }],
+  repeatedEmailErrorMessage: 'User for repeated@wolox.com.ar already exists!'
 };
 
 exports.userSignInErrorsMessages = {
-  emptyBodyErrorMessage: [
-    { email: emailErrorMessage },
-    { email: emailErrorMessage },
-    { password: passwordErrorMessage },
-    { password: passwordErrorMessage },
-    { password: passwordErrorMessage }
-  ],
-  wrongEmailErrorMessage: [{ email: emailErrorMessage }],
-  invalidPasswordErrorMessage: 'Ivalid password for user: fake@wolox.com.ar'
+  emptyBodyErrorMessage: [{ email: emailErrorMessage }, { password: passwordErrorMessage }],
+  invalidEmailErrorMessage: [{ email: emailErrorMessage }],
+  invalidPasswordErrorMessage: [{ password: passwordErrorMessage }],
+  unregisteredUserErrorMessage: 'There is no user created for: unregisterd@wolox.com.ar',
+  wrongPasswordErrorMessage: 'Ivalid password for user: fake@wolox.com.ar'
 };

@@ -15,20 +15,17 @@ exports.signUpUser = (req, res, next) => {
       if (foundUser) {
         throw userCreationError(`User for ${email} already exists!`);
       } else {
-        return hashPassword(password)
-          .then(hashedPassword =>
-            createUser(firstName, lastName, email, hashedPassword)
-              .then(user => {
-                logger.info(`New user created for: ${firstName} ${lastName}`);
-                res.status(201).send(user);
-              })
-              .catch(err => {
-                logger.error(util.inspect(err));
-                throw userCreationError(err.message);
-              })
-          )
-          .then(response => res.status(201).send(response))
-          .catch(next);
+        return hashPassword(password).then(hashedPassword =>
+          createUser(firstName, lastName, email, hashedPassword)
+            .then(user => {
+              logger.info(`New user created for: ${firstName} ${lastName}`);
+              res.status(201).send(user);
+            })
+            .catch(err => {
+              logger.error(util.inspect(err));
+              throw userCreationError(err.message);
+            })
+        );
       }
     })
     .catch(next);
@@ -36,10 +33,9 @@ exports.signUpUser = (req, res, next) => {
 
 exports.signInUser = (req, res, next) =>
   findByEmail(req.body.email)
-    .then(user =>
-      bcrypt
-        .compare(req.body.password, user.password)
-        .then(result => {
+    .then(user => {
+      if (user) {
+        return bcrypt.compare(req.body.password, user.password).then(result => {
           if (result) {
             const token = jwt.sign(
               { id: user.id, firstName: user.firstName, lastName: user.lastName },
@@ -47,12 +43,10 @@ exports.signInUser = (req, res, next) =>
             );
             res.status(200).send(token);
           } else {
-            res.status(401).send(userLoginError(`Ivalid password for user: ${user.email}`));
+            throw userLoginError(`Ivalid password for user: ${user.email}`);
           }
-        })
-        .catch(err => {
-          logger.error(util.inspect(err));
-          throw userLoginError(err.message);
-        })
-    )
+        });
+      }
+      throw userLoginError(`There is no user created for: ${req.body.email}`);
+    })
     .catch(next);
