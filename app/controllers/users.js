@@ -4,21 +4,22 @@ const jwt = require('jsonwebtoken');
 
 const logger = require('../logger');
 const error = require('../errors');
+const { signUpMapper, signInMapper } = require('../../app/mappers/sign_up_mapper');
 const { hashPassword, findByEmail, createUser } = require('../services/users');
 
 const { userCreationError, userLoginError } = error;
 
 exports.signUpUser = (req, res, next) => {
-  const { first_name: firstName, last_name: lastName, email, password } = req.body;
-  return findByEmail(email)
+  const mappedData = signUpMapper(req.body);
+  return findByEmail(mappedData.email)
     .then(foundUser => {
       if (foundUser) {
-        throw userCreationError(`User for ${email} already exists!`);
+        throw userCreationError(`User for ${mappedData.email} already exists!`);
       } else {
-        return hashPassword(password).then(hashedPassword =>
-          createUser(firstName, lastName, email, hashedPassword)
+        return hashPassword(mappedData.password).then(hashedPassword =>
+          createUser(mappedData.firstName, mappedData.lastName, mappedData.email, hashedPassword)
             .then(user => {
-              logger.info(`New user created for: ${firstName} ${lastName}`);
+              logger.info(`New user created for: ${mappedData.firstName} ${mappedData.lastName}`);
               res.status(201).send(user);
             })
             .catch(err => {
@@ -31,22 +32,24 @@ exports.signUpUser = (req, res, next) => {
     .catch(next);
 };
 
-exports.signInUser = (req, res, next) =>
-  findByEmail(req.body.email)
+exports.signInUser = (req, res, next) => {
+  const mappedData = signInMapper(req.body);
+  return findByEmail(mappedData.email)
     .then(user => {
       if (user) {
-        return bcrypt.compare(req.body.password, user.password).then(result => {
+        return bcrypt.compare(mappedData.password, user.password).then(result => {
           if (result) {
             const token = jwt.sign(
               { id: user.id, firstName: user.firstName, lastName: user.lastName },
               process.env.TOKEN_SECRET
             );
-            res.status(200).send(token);
+            res.status(200).send({ token });
           } else {
             throw userLoginError(`Ivalid password for user: ${user.email}`);
           }
         });
       }
-      throw userLoginError(`There is no user created for: ${req.body.email}`);
+      throw userLoginError(`There is no user created for: ${mappedData.email}`);
     })
     .catch(next);
+};

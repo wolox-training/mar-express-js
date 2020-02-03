@@ -67,7 +67,7 @@ describe('POST /users', () => {
         expect(Object.keys(successResponse.body)).toEqual(responseKeys);
       });
       it("should have an email correspondig to wolox's domain", () => {
-        expect(successResponse.body.email.slice(-13)).toEqual('@wolox.com.ar');
+        expect(successResponse.body.email.includes('@wolox.com.ar')).toBe(true);
       });
     });
   });
@@ -131,7 +131,7 @@ describe('POST /users/sessions', () => {
         expect(successResponse.statusCode).toEqual(200);
       });
       it('should contain the corresponding jwt', () => {
-        expect(successResponse.text).toEqual(responseToken);
+        expect(successResponse.body.token).toEqual(responseToken);
       });
     });
   });
