@@ -1,6 +1,7 @@
 const { healthCheck } = require('./controllers/healthCheck');
 const { getAlbums, getAlbumPhotos } = require('./controllers/albums');
 const { signUpUser, signInUser, getUsers } = require('./controllers/users');
+const { checkAuth } = require('./middlewares/check_auth');
 const { userSignUpValidation, userSignInValidation } = require('./middlewares/user_validation');
 
 exports.init = app => {
@@ -9,5 +10,5 @@ exports.init = app => {
   app.get('/albums/:id/photos', getAlbumPhotos);
   app.post('/users', userSignUpValidation, signUpUser);
   app.post('/users/sessions', userSignInValidation, signInUser);
-  app.get('/users', getUsers);
+  app.get('/users', checkAuth, getUsers);
 };
