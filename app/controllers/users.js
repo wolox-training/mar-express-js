@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const logger = require('../logger');
 const error = require('../errors');
-const { signUpMapper, signInMapper } = require('../../app/mappers/sign_up_mapper');
+const { signUpMapper, signInMapper } = require('../mappers/post_mappers');
+const { listUsersMapper } = require('../mappers/get_mappers');
 const { hashPassword, findByEmail, createUser, listUsers } = require('../services/users');
 
 const { userCreationError, userLoginError } = error;
@@ -55,9 +56,8 @@ exports.signInUser = (req, res, next) => {
 };
 
 exports.getUsers = (req, res, next) => {
-  const { limit, page } = req.body;
-  const offset = page > 0 ? (page - 1) * limit : 0;
-  listUsers(limit, offset, page)
+  const mappedData = listUsersMapper(req.body);
+  return listUsers(mappedData.limit, mappedData.offset, mappedData.page)
     .then(users => res.status(200).send(users))
     .catch(next);
 };
