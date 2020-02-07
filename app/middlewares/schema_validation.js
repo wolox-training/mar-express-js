@@ -1,11 +1,12 @@
 const { checkSchema, validationResult } = require('express-validator');
 
 const error = require('../errors');
-const { userSignUpSchema, userSignInSchema } = require('../../app/schemas/users');
+const { userSignUpSchema, userSignInSchema } = require('../schemas/users');
+const { paginatedListSchema } = require('../schemas/pagination');
 
 const { validationError } = error;
 
-function validateUser(req, res, next) {
+function validate(req, res, next) {
   const errors = validationResult(req);
   if (errors.isEmpty()) {
     return next();
@@ -15,5 +16,6 @@ function validateUser(req, res, next) {
   return next(validationError(extractedErrors));
 }
 
-exports.userSignUpValidation = [checkSchema(userSignUpSchema), validateUser];
-exports.userSignInValidation = [checkSchema(userSignInSchema), validateUser];
+exports.userSignUpValidation = [checkSchema(userSignUpSchema), validate];
+exports.userSignInValidation = [checkSchema(userSignInSchema), validate];
+exports.listValidation = [checkSchema(paginatedListSchema), validate];

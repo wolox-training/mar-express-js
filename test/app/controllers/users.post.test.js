@@ -138,7 +138,7 @@ describe('POST /users/sessions', () => {
 
   describe('Failure cases', () => {
     describe('Does not log in a user when the user is not registerd', () => {
-      it('should have satatus code 401', () => {
+      it('should have status code 401', () => {
         expect(unregisterdUserResponse.statusCode).toEqual(401);
       });
       it('should respond with unregisterd user error message', () => {
@@ -152,7 +152,7 @@ describe('POST /users/sessions', () => {
     });
 
     describe('Does not log in a user when the password is incorrect', () => {
-      it('should have satatus code 401', () => {
+      it('should have status code 401', () => {
         expect(wrongPasswordResponse.statusCode).toEqual(401);
       });
       it('should respond with wrong password error message', () => {
