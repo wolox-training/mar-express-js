@@ -6,7 +6,7 @@ const { paginatedListSchema } = require('../schemas/pagination');
 
 const { validationError } = error;
 
-function validate(req, res, next) {
+const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (errors.isEmpty()) {
     return next();
@@ -14,7 +14,7 @@ function validate(req, res, next) {
   const extractedErrors = [];
   errors.array({ onlyFirstError: true }).map(err => extractedErrors.push({ [err.param]: err.msg }));
   return next(validationError(extractedErrors));
-}
+};
 
 exports.userSignUpValidation = [checkSchema(userSignUpSchema), validate];
 exports.userSignInValidation = [checkSchema(userSignInSchema), validate];

@@ -38,11 +38,11 @@ describe('GET /users (VALIDATION)', () => {
     invalidLimitResponse = await request(app)
       .get('/users')
       .set('Authorization', token)
-      .send({ limit: invalidTypeLimit });
+      .query({ limit: invalidTypeLimit });
     invalidPageResponse = await request(app)
       .get('/users')
       .set('Authorization', token)
-      .send({ page: invalidTypePage });
+      .query({ page: invalidTypePage });
   });
   describe('Failure cases due to invalid request', () => {
     describe('Request fails because of body with invalid limit parameter', () => {

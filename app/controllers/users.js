@@ -56,8 +56,8 @@ exports.signInUser = (req, res, next) => {
 };
 
 exports.getUsers = (req, res, next) => {
-  const mappedData = listUsersMapper(req.body);
-  return listUsers(mappedData.limit, mappedData.offset, mappedData.page)
+  const mappedData = listUsersMapper(req.query);
+  return listUsers(mappedData)
     .then(users => res.status(200).send(users))
     .catch(next);
 };

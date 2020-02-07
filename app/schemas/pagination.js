@@ -2,14 +2,14 @@ const { limitErrorMessage, pageErrorMessage } = require('./error_messages').vali
 
 exports.paginatedListSchema = {
   limit: {
-    in: ['body'],
+    in: ['query'],
     optional: true,
     isInt: true,
     toInt: true,
     errorMessage: limitErrorMessage
   },
   page: {
-    in: ['body'],
+    in: ['query'],
     optional: true,
     isInt: true,
     toInt: true,

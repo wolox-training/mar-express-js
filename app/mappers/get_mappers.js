@@ -1,5 +1,9 @@
-exports.listUsersMapper = requestBody => ({
-  limit: requestBody.limit || 3,
-  page: requestBody.page || 1,
-  offset: requestBody.page > 0 ? (requestBody.page - 1) * (requestBody.limit || 3) : 0
+const config = require('../../config/index');
+
+const { limit, offset, page } = config.common.pagination;
+
+exports.listUsersMapper = requestQuerie => ({
+  limit: requestQuerie.limit || limit,
+  page: requestQuerie.page || page,
+  offset: requestQuerie.page > 0 ? (requestQuerie.page - 1) * (requestQuerie.limit || limit) : offset
 });

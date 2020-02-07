@@ -56,10 +56,10 @@ describe('GET /users', () => {
     successResponse = await request(app)
       .get('/users')
       .set('Authorization', token)
-      .send({ limit, page });
+      .query({ limit, page });
     unauthorizedResponse = await request(app)
       .get('/users')
-      .send({ limit, page });
+      .query({ limit, page });
     userLoginErrorCode = 'user_login_error';
   });
 
