@@ -4,7 +4,9 @@ const logger = require('../logger');
 const DEFAULT_STATUS_CODE = 500;
 
 const statusCodes = {
-  [errors.USER_CREATION_ERROR]: 400,
+  [errors.VALIDATION_ERROR]: 400,
+  [errors.USER_LOGIN_ERROR]: 401,
+  [errors.USER_CREATION_ERROR]: 422,
   [errors.DATABASE_ERROR]: 503,
   [errors.DEFAULT_ERROR]: 500
 };

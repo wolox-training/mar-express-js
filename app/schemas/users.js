@@ -1,3 +1,10 @@
+const {
+  firstNameErrorMessage,
+  lastNameErrorMessage,
+  emailErrorMessage,
+  passwordErrorMessage
+} = require('./error_messages').validationErrorMessages;
+
 exports.userSignUpSchema = {
   first_name: {
     in: ['body'],
@@ -5,7 +12,7 @@ exports.userSignUpSchema = {
     isString: true,
     notEmpty: true,
     trim: true,
-    errorMessage: "The key 'first_name' it's required, must be of type 'string' and can't be blank"
+    errorMessage: firstNameErrorMessage
   },
   last_name: {
     in: ['body'],
@@ -13,7 +20,7 @@ exports.userSignUpSchema = {
     isString: true,
     notEmpty: true,
     trim: true,
-    errorMessage: "The key 'last_name' it's required, must be of type 'string' and can't be blank"
+    errorMessage: lastNameErrorMessage
   },
   email: {
     in: ['body'],
@@ -21,7 +28,7 @@ exports.userSignUpSchema = {
     isString: true,
     notEmpty: true,
     matches: { options: /@(wolox)\.com\.ar$/i },
-    errorMessage: "The key 'email' it's required, must be of type 'string' and must belong to wolox domain"
+    errorMessage: emailErrorMessage
   },
   password: {
     in: ['body'],
@@ -30,7 +37,26 @@ exports.userSignUpSchema = {
     notEmpty: true,
     isLength: { options: { min: 8 } },
     isAlphanumeric: true,
-    errorMessage:
-      "The key 'password' it's required, must be of type 'string', can't be blank, must be at least 8 characters long and must be alphanumeric"
+    errorMessage: passwordErrorMessage
+  }
+};
+
+exports.userSignInSchema = {
+  email: {
+    in: ['body'],
+    exists: true,
+    isString: true,
+    notEmpty: true,
+    matches: { options: /@(wolox)\.com\.ar$/i },
+    errorMessage: emailErrorMessage
+  },
+  password: {
+    in: ['body'],
+    exists: true,
+    isString: true,
+    notEmpty: true,
+    isLength: { options: { min: 8 } },
+    isAlphanumeric: true,
+    errorMessage: passwordErrorMessage
   }
 };

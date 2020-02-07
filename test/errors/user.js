@@ -1,29 +1,26 @@
+const {
+  firstNameErrorMessage,
+  lastNameErrorMessage,
+  emailErrorMessage,
+  passwordErrorMessage
+} = require('../../app/schemas/error_messages').validationErrorMessages;
+
 exports.userSignUpErrorsMessages = {
   emptyBodyErrorMessage: [
-    { first_name: "The key 'first_name' it's required, must be of type 'string' and can't be blank" },
-    { last_name: "The key 'last_name' it's required, must be of type 'string' and can't be blank" },
-    { email: "The key 'email' it's required, must be of type 'string' and must belong to wolox domain" },
-    { email: "The key 'email' it's required, must be of type 'string' and must belong to wolox domain" },
-    {
-      password:
-        "The key 'password' it's required, must be of type 'string', can't be blank, must be at least 8 characters long and must be alphanumeric"
-    },
-    {
-      password:
-        "The key 'password' it's required, must be of type 'string', can't be blank, must be at least 8 characters long and must be alphanumeric"
-    },
-    {
-      password:
-        "The key 'password' it's required, must be of type 'string', can't be blank, must be at least 8 characters long and must be alphanumeric"
-    }
+    { first_name: firstNameErrorMessage },
+    { last_name: lastNameErrorMessage },
+    { email: emailErrorMessage },
+    { password: passwordErrorMessage }
   ],
-  wrongEmailErrorMessage: [
-    { email: "The key 'email' it's required, must be of type 'string' and must belong to wolox domain" }
-  ],
-  wrongPasswordErrorMessage: [
-    {
-      password:
-        "The key 'password' it's required, must be of type 'string', can't be blank, must be at least 8 characters long and must be alphanumeric"
-    }
-  ]
+  invalidEmailErrorMessage: [{ email: emailErrorMessage }],
+  invalidPasswordErrorMessage: [{ password: passwordErrorMessage }],
+  repeatedEmailErrorMessage: 'User for repeated@wolox.com.ar already exists!'
+};
+
+exports.userSignInErrorsMessages = {
+  emptyBodyErrorMessage: [{ email: emailErrorMessage }, { password: passwordErrorMessage }],
+  invalidEmailErrorMessage: [{ email: emailErrorMessage }],
+  invalidPasswordErrorMessage: [{ password: passwordErrorMessage }],
+  unregisteredUserErrorMessage: 'There is no user created for: unregisterd@wolox.com.ar',
+  wrongPasswordErrorMessage: 'Ivalid password for user: fake@wolox.com.ar'
 };
