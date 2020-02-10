@@ -2,7 +2,9 @@ const {
   firstNameErrorMessage,
   lastNameErrorMessage,
   emailErrorMessage,
-  passwordErrorMessage
+  passwordErrorMessage,
+  limitErrorMessage,
+  pageErrorMessage
 } = require('../../app/schemas/error_messages').validationErrorMessages;
 
 exports.userSignUpErrorsMessages = {
@@ -23,4 +25,10 @@ exports.userSignInErrorsMessages = {
   invalidPasswordErrorMessage: [{ password: passwordErrorMessage }],
   unregisteredUserErrorMessage: 'There is no user created for: unregisterd@wolox.com.ar',
   wrongPasswordErrorMessage: 'Ivalid password for user: fake@wolox.com.ar'
+};
+
+exports.usersListErrorMessages = {
+  invalidLimitErrorMessage: [{ limit: limitErrorMessage }],
+  invalidPageErrorMessage: [{ page: pageErrorMessage }],
+  authFailedErrorMessage: 'Authentication failed!'
 };

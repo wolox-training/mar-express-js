@@ -4,5 +4,7 @@ exports.validationErrorMessages = {
   emailErrorMessage:
     "The key 'email' it's required, must be of type 'string' and must belong to wolox domain",
   passwordErrorMessage:
-    "The key 'password' it's required, must be of type 'string', can't be blank, must be at least 8 characters long and must be alphanumeric"
+    "The key 'password' it's required, must be of type 'string', can't be blank, must be at least 8 characters long and must be alphanumeric",
+  limitErrorMessage: "The key 'limit' must be of type 'integer'",
+  pageErrorMessage: "The key 'page' must be of type 'integer'"
 };

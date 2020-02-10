@@ -4,8 +4,9 @@ const jwt = require('jsonwebtoken');
 
 const logger = require('../logger');
 const error = require('../errors');
-const { signUpMapper, signInMapper } = require('../../app/mappers/sign_up_mapper');
-const { hashPassword, findByEmail, createUser } = require('../services/users');
+const { signUpMapper, signInMapper } = require('../mappers/post_mappers');
+const { listUsersMapper } = require('../mappers/get_mappers');
+const { hashPassword, findByEmail, createUser, listUsers } = require('../services/users');
 
 const { userCreationError, userLoginError } = error;
 
@@ -51,5 +52,12 @@ exports.signInUser = (req, res, next) => {
       }
       throw userLoginError(`There is no user created for: ${mappedData.email}`);
     })
+    .catch(next);
+};
+
+exports.getUsers = (req, res, next) => {
+  const mappedData = listUsersMapper(req.query);
+  return listUsers(mappedData)
+    .then(users => res.status(200).send(users))
     .catch(next);
 };

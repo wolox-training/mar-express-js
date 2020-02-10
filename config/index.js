@@ -49,6 +49,11 @@ const config = {
     },
     bcrypt: {
       saltRounds: 10
+    },
+    pagination: {
+      limit: 3,
+      offset: 0,
+      page: 1
     }
   }
 };
