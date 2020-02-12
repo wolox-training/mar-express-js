@@ -39,6 +39,12 @@ module.exports = {
   paths,
   components: {
     schemas,
-    securitySchemes: {}
+    securitySchemes: {
+      apiKeyAuth: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'Authorization'
+      }
+    }
   }
 };

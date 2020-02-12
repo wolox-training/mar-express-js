@@ -3,8 +3,20 @@ module.exports = {
     get: {
       tags: ['CRUD operations'],
       description: 'Get users',
+      security: {
+        apiKeyAuth: []
+      },
       operationId: 'getUsers',
       parameters: [
+        {
+          name: 'limit',
+          in: 'query',
+          schema: {
+            type: 'integer',
+            default: 3
+          },
+          required: false
+        },
         {
           name: 'page',
           in: 'query',
@@ -21,7 +33,27 @@ module.exports = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/Users'
+                $ref: '#/components/schemas/listUsers'
+              }
+            }
+          }
+        },
+        400: {
+          description: 'Bad Request',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/getUsersBadRequestError'
+              }
+            }
+          }
+        },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/unauthorizedError'
               }
             }
           }
@@ -31,13 +63,13 @@ module.exports = {
     post: {
       tags: ['CRUD operations'],
       description: 'Create user',
-      operationId: 'createUser',
+      operationId: 'signUpUser',
       parameters: [],
       requestBody: {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/signUpUserReq'
             }
           }
         },
@@ -45,18 +77,80 @@ module.exports = {
       },
       responses: {
         200: {
-          description: 'New user was created'
-        },
-        400: {
-          description: 'Invalid parameters',
+          description: 'New user was created',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/Error'
-              },
-              example: {
-                message: 'User´s email already exists',
-                internal_code: 'invalid_parameters'
+                $ref: '#/components/schemas/signUpUserRes'
+              }
+            }
+          }
+        },
+        400: {
+          description: 'Bad Request',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/signUpUserBadRequestError'
+              }
+            }
+          }
+        },
+        422: {
+          description: 'User already exist',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/unprocessableEntityError'
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  '/users/sessions': {
+    post: {
+      tags: ['CRUD operations'],
+      description: 'Log in user',
+      operationId: 'signInUser',
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/signInUserReq'
+            }
+          }
+        },
+        required: true
+      },
+      responses: {
+        200: {
+          description: 'Successful login',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/signInUserRes'
+              }
+            }
+          }
+        },
+        400: {
+          description: 'Bad Request',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/signInUserBadRequestError'
+              }
+            }
+          }
+        },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/unauthorizedError'
               }
             }
           }

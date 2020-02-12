@@ -143,7 +143,7 @@ describe('POST /users/sessions', () => {
       });
       it('should respond with unregisterd user error message', () => {
         expect(unregisterdUserResponse.body.message).toEqual(
-          userSignInErrorsMessages.unregisteredUserErrorMessage
+          userSignInErrorsMessages.unauthorizedErrorMessage
         );
       });
       it('should respond with user login internal code', () => {
@@ -156,9 +156,7 @@ describe('POST /users/sessions', () => {
         expect(wrongPasswordResponse.statusCode).toEqual(401);
       });
       it('should respond with wrong password error message', () => {
-        expect(wrongPasswordResponse.body.message).toEqual(
-          userSignInErrorsMessages.wrongPasswordErrorMessage
-        );
+        expect(wrongPasswordResponse.body.message).toEqual(userSignInErrorsMessages.unauthorizedErrorMessage);
       });
       it('should respond with user login internal code', () => {
         expect(wrongPasswordResponse.body.internal_code).toEqual(userLoginErrorCode);
