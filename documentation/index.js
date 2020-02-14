@@ -1,6 +1,8 @@
 const config = require('../config');
-const schemas = require('./schemas');
+const parameters = require('./parameters');
+const responses = require('./responses');
 const paths = require('./paths');
+const schemas = require('./schemas');
 
 const port = config.common.api.port || 8080;
 
@@ -38,7 +40,15 @@ module.exports = {
   ],
   paths,
   components: {
+    parameters,
+    responses,
     schemas,
-    securitySchemes: {}
+    securitySchemes: {
+      apiKeyAuth: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'Authorization'
+      }
+    }
   }
 };

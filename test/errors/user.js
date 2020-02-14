@@ -23,8 +23,7 @@ exports.userSignInErrorsMessages = {
   emptyBodyErrorMessage: [{ email: emailErrorMessage }, { password: passwordErrorMessage }],
   invalidEmailErrorMessage: [{ email: emailErrorMessage }],
   invalidPasswordErrorMessage: [{ password: passwordErrorMessage }],
-  unregisteredUserErrorMessage: 'There is no user created for: unregisterd@wolox.com.ar',
-  wrongPasswordErrorMessage: 'Ivalid password for user: fake@wolox.com.ar'
+  unauthorizedErrorMessage: 'Authentication failed: Invalid Credentials'
 };
 
 exports.usersListErrorMessages = {

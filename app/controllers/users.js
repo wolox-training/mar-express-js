@@ -46,11 +46,11 @@ exports.signInUser = (req, res, next) => {
             );
             res.status(200).send({ token });
           } else {
-            throw userLoginError(`Ivalid password for user: ${user.email}`);
+            throw userLoginError('Authentication failed: Invalid Credentials');
           }
         });
       }
-      throw userLoginError(`There is no user created for: ${mappedData.email}`);
+      throw userLoginError('Authentication failed: Invalid Credentials');
     })
     .catch(next);
 };
