@@ -8,56 +8,13 @@ module.exports = {
       },
       operationId: 'getUsers',
       parameters: [
-        {
-          name: 'limit',
-          in: 'query',
-          schema: {
-            type: 'integer',
-            default: 3
-          },
-          required: false
-        },
-        {
-          name: 'page',
-          in: 'query',
-          schema: {
-            type: 'integer',
-            default: 1
-          },
-          required: false
-        }
+        { $ref: '#components/parameters/limitParameter' },
+        { $ref: '#components/parameters/pageParameter' }
       ],
       responses: {
-        200: {
-          description: 'Users were obtained',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/listUsers'
-              }
-            }
-          }
-        },
-        400: {
-          description: 'Bad Request',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/getUsersBadRequestError'
-              }
-            }
-          }
-        },
-        401: {
-          description: 'Unauthorized',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/unauthorizedError'
-              }
-            }
-          }
-        }
+        200: { $ref: '#components/responses/getUsers/success' },
+        400: { $ref: '#components/responses/getUsers/badRequest' },
+        401: { $ref: '#components/responses/getUsers/unauthorized' }
       }
     },
     post: {
@@ -76,36 +33,9 @@ module.exports = {
         required: true
       },
       responses: {
-        200: {
-          description: 'New user was created',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/signUpUserRes'
-              }
-            }
-          }
-        },
-        400: {
-          description: 'Bad Request',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/signUpUserBadRequestError'
-              }
-            }
-          }
-        },
-        422: {
-          description: 'User already exist',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/unprocessableEntityError'
-              }
-            }
-          }
-        }
+        200: { $ref: '#components/responses/signUpUser/success' },
+        400: { $ref: '#components/responses/signUpUser/badRequest' },
+        422: { $ref: '#components/responses/signUpUser/unprocessableEntity' }
       }
     }
   },
@@ -125,36 +55,9 @@ module.exports = {
         required: true
       },
       responses: {
-        200: {
-          description: 'Successful login',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/signInUserRes'
-              }
-            }
-          }
-        },
-        400: {
-          description: 'Bad Request',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/signInUserBadRequestError'
-              }
-            }
-          }
-        },
-        401: {
-          description: 'Unauthorized',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/unauthorizedError'
-              }
-            }
-          }
-        }
+        200: { $ref: '#components/responses/signInUser/success' },
+        400: { $ref: '#components/responses/signInUser/badRequest' },
+        401: { $ref: '#components/responses/signInUser/unauthorized' }
       }
     }
   }
