@@ -10,3 +10,21 @@ exports.checkAuth = (req, res, next) => {
     throw userLoginError('Authentication failed!');
   }
 };
+
+exports.checkAdminAuth = (req, res, next) => {
+  let decoded = {};
+  try {
+    decoded = jwt.verify(req.headers.authorization, process.env.TOKEN_SECRET);
+    if (decoded.admin) {
+      next();
+    } else {
+      throw userLoginError('User is not admin');
+    }
+  } catch (err) {
+    if (err.message === 'invalid signature') {
+      throw userLoginError('Authentication failed!');
+    } else {
+      throw userLoginError(err.message);
+    }
+  }
+};
