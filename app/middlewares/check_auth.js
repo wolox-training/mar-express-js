@@ -4,7 +4,8 @@ const { userLoginError } = require('../errors');
 
 exports.checkAuth = (req, res, next) => {
   try {
-    jwt.verify(req.headers.authorization, process.env.TOKEN_SECRET);
+    const decoded = jwt.verify(req.headers.authorization, process.env.TOKEN_SECRET);
+    req.user = decoded;
     next();
   } catch (err) {
     throw userLoginError('Authentication failed!');
