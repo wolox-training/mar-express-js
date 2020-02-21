@@ -95,5 +95,7 @@ module.exports = {
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiQWxiZXJ0byIsImxhc3ROYW1lIjoiQWx2YXJleiIsImlhdCI6MTU4MTUxMzU4NX0.RQBXNQWEaj8G-t5Y1DMrT3FgD5g0NCpHobwirIypM8g'
       }
     }
-  }
+  },
+  limitParameter: { type: 'integer', default: 3 },
+  pageParameter: { type: 'integer', default: 1 }
 };

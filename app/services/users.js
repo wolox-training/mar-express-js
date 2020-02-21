@@ -11,7 +11,12 @@ exports.hashPassword = password => bcrypt.hash(password, saltRounds);
 exports.findByEmail = value => User.findOne({ where: { email: value } });
 
 exports.createUser = (firstName, lastName, email, password) =>
-  User.create({ firstName, lastName, email, password });
+  User.create({ firstName, lastName, email, password, admin: false });
+
+exports.createAdminUser = (firstName, lastName, email, password) =>
+  User.create({ firstName, lastName, email, password, admin: true });
+
+exports.updateToAdmin = user => user.update({ admin: true });
 
 exports.listUsers = mappedData => {
   const { limit, offset } = mappedData;

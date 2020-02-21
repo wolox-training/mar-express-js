@@ -19,6 +19,12 @@ exports.userSignUpErrorsMessages = {
   repeatedEmailErrorMessage: 'User for repeated@wolox.com.ar already exists!'
 };
 
+exports.adminUserSignUpErrorMessages = {
+  repeatedAdminEmailErrorMessage: 'Admin user for repeated@wolox.com.ar already exists!',
+  unauthorizedErrorMessage: 'Authentication failed: Invalid Credentials',
+  unauthorizedUserErrorMessage: 'User is not admin'
+};
+
 exports.userSignInErrorsMessages = {
   emptyBodyErrorMessage: [{ email: emailErrorMessage }, { password: passwordErrorMessage }],
   invalidEmailErrorMessage: [{ email: emailErrorMessage }],
@@ -29,5 +35,5 @@ exports.userSignInErrorsMessages = {
 exports.usersListErrorMessages = {
   invalidLimitErrorMessage: [{ limit: limitErrorMessage }],
   invalidPageErrorMessage: [{ page: pageErrorMessage }],
-  authFailedErrorMessage: 'Authentication failed!'
+  authFailedErrorMessage: 'Authentication failed: Invalid Credentials'
 };
