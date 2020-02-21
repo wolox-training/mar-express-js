@@ -2,13 +2,13 @@ module.exports = {
   limitParameter: {
     name: 'limit',
     in: 'query',
-    schema: { type: 'integer', default: 3 },
+    schema: { $ref: '#components/schemas/limitParameter' },
     required: false
   },
   pageParameter: {
     name: 'page',
     in: 'query',
-    schema: { type: 'integer', default: 1 },
+    schema: { $ref: '#components/schemas/pageParameter' },
     required: false
   }
 };
