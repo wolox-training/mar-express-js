@@ -26,6 +26,7 @@ describe('POST /users', () => {
       'lastName',
       'email',
       'password',
+      'admin',
       'updatedAt',
       'createdAt',
       'deleted_at'
@@ -108,7 +109,12 @@ describe('POST /users/sessions', () => {
         password: 'passWord58'
       });
     responseToken = jwt.sign(
-      { id: successUser.id, firstName: successUser.firstName, lastName: successUser.lastName },
+      {
+        id: successUser.id,
+        firstName: successUser.firstName,
+        lastName: successUser.lastName,
+        admin: successUser.admin
+      },
       process.env.TOKEN_SECRET
     );
     unregisterdUserResponse = await request(app)

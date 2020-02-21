@@ -4,27 +4,28 @@ const { userLoginError } = require('../errors');
 
 exports.checkAuth = (req, res, next) => {
   try {
-    jwt.verify(req.headers.authorization, process.env.TOKEN_SECRET);
+    const decoded = jwt.verify(req.headers.authorization, process.env.TOKEN_SECRET);
+    req.user = decoded;
     next();
   } catch (err) {
-    throw userLoginError('Authentication failed!');
+    throw userLoginError('Authentication failed: Invalid Credentials');
   }
 };
 
 exports.checkAdminAuth = (req, res, next) => {
-  let decoded = {};
   try {
-    decoded = jwt.verify(req.headers.authorization, process.env.TOKEN_SECRET);
+    const decoded = jwt.verify(req.headers.authorization, process.env.TOKEN_SECRET);
     if (decoded.admin) {
+      req.user = decoded;
       next();
     } else {
       throw userLoginError('User is not admin');
     }
   } catch (err) {
-    if (err.message === 'invalid signature') {
-      throw userLoginError('Authentication failed!');
-    } else {
+    if (err.message === 'User is not admin') {
       throw userLoginError(err.message);
+    } else {
+      throw userLoginError('Authentication failed: Invalid Credentials');
     }
   }
 };
