@@ -1,6 +1,7 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
 const bcrypt = require('bcrypt');
+const nock = require('nock');
 
 const app = require('../../../app');
 const config = require('../../../config/index');
@@ -8,6 +9,15 @@ const { factoryByModel } = require('../../factory/factory_by_models');
 const { albumsErrorMessages } = require('../../errors/albums');
 
 const { saltRounds } = config.common.bcrypt;
+
+nock('https://jsonplaceholder.typicode.com')
+  .persist()
+  .get('/albums/1')
+  .reply(200, {
+    userId: 1,
+    id: 1,
+    title: 'mocked book'
+  });
 
 factoryByModel('users');
 
