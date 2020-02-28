@@ -1,8 +1,10 @@
+const util = require('util');
+
 const albumsService = require('../services/albums');
 const logger = require('../logger');
 const error = require('../errors');
 
-const { apiAlbumsError } = error;
+const { apiAlbumsError, existingAlbumError } = error;
 
 const { listAlbums, listAlbumPhotos, getAlbumData, createAlbum, findAlbum } = albumsService;
 
@@ -21,7 +23,7 @@ exports.buyAlbum = (req, res, next) =>
     .then(albumData =>
       findAlbum(albumData.id, req.user.id).then(existingAlbum => {
         if (existingAlbum) {
-          throw apiAlbumsError(
+          throw existingAlbumError(
             `Album not bought: user ${req.user.firstName} ${req.user.lastName} already had '${albumData.title}'.`
           );
         } else {
@@ -36,4 +38,11 @@ exports.buyAlbum = (req, res, next) =>
         }
       })
     )
+    .catch(err => {
+      logger.error(util.inspect(err));
+      if (err.internalCode === 'api_albums_error') {
+        throw apiAlbumsError('Album not bought: could not find album');
+      }
+      throw existingAlbumError(err.message);
+    })
     .catch(next);
