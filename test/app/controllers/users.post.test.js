@@ -1,18 +1,20 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const {
+  resHashedPasswordMock,
+  resComparePasswordMock,
+  rejComparePasswordMock
+} = require('../../mocks/bcrypt');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { userSignUpErrorsMessages, userSignInErrorsMessages } = require('../../errors/user');
-
-const { saltRounds } = config.common.bcrypt;
 
 factoryByModel('users');
 
 describe('POST /users', () => {
+  let mockedPassword = {};
   let responseKeys = {};
   let successUser = {};
   let repeatedEmailUser = {};
@@ -20,6 +22,7 @@ describe('POST /users', () => {
   let repeatedEmailResponse = {};
   let userCreationErrorCode = {};
   beforeAll(async () => {
+    mockedPassword = await resHashedPasswordMock('passWord58');
     responseKeys = await [
       'id',
       'firstName',
@@ -43,7 +46,7 @@ describe('POST /users', () => {
         password: successUser.password
       });
     await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+      password: mockedPassword,
       email: 'repeated@wolox.com.ar'
     });
     repeatedEmailUser = await factory.build('users').then(dummy => dummy.dataValues);
@@ -91,6 +94,7 @@ describe('POST /users', () => {
 });
 
 describe('POST /users/sessions', () => {
+  let mockedPassword = {};
   let successUser = {};
   let responseToken = {};
   let successResponse = {};
@@ -98,10 +102,12 @@ describe('POST /users/sessions', () => {
   let wrongPasswordResponse = {};
   let userLoginErrorCode = {};
   beforeAll(async () => {
+    mockedPassword = await resHashedPasswordMock('passWord58');
     successUser = await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+      password: mockedPassword,
       email: 'fake@wolox.com.ar'
     });
+    await resComparePasswordMock();
     successResponse = await request(app)
       .post('/users/sessions')
       .send({
@@ -123,6 +129,7 @@ describe('POST /users/sessions', () => {
         email: 'unregisterd@wolox.com.ar',
         password: 'unregistered'
       });
+    await rejComparePasswordMock();
     wrongPasswordResponse = await request(app)
       .post('/users/sessions')
       .send({

@@ -1,13 +1,10 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
 
+const { resHashedPasswordMock, resComparePasswordMock } = require('../../mocks/bcrypt');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { authFailedErrorMessage } = require('../../errors/user').usersListErrorMessages;
-
-const { saltRounds } = config.common.bcrypt;
 
 factoryByModel('users');
 
@@ -16,6 +13,7 @@ describe('GET /users', () => {
   let defaultPage = {};
   let limit = {};
   let page = {};
+  let mockedPassword = {};
   let token = {};
   let successResponseKeys = {};
   let emptyBodyResponse = {};
@@ -27,9 +25,11 @@ describe('GET /users', () => {
     defaultPage = 1;
     limit = 4;
     page = 2;
+    await resComparePasswordMock();
+    mockedPassword = await resHashedPasswordMock('passWord58');
     await factory.createMany('users', 9);
     await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+      password: mockedPassword,
       email: 'success.user@wolox.com.ar'
     });
     token = await request(app)

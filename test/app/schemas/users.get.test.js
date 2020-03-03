@@ -1,31 +1,32 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
 
+const { resHashedPasswordMock, resComparePasswordMock } = require('../../mocks/bcrypt');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const {
   invalidLimitErrorMessage,
   invalidPageErrorMessage
 } = require('../../errors/user').usersListErrorMessages;
 
-const { saltRounds } = config.common.bcrypt;
 const validationErrorCode = 'validation_error';
 
 factoryByModel('users');
 
 describe('GET /users (VALIDATION)', () => {
+  let mockedPassword = {};
   let invalidTypeLimit = {};
   let invalidTypePage = {};
   let token = {};
   let invalidLimitResponse = {};
   let invalidPageResponse = {};
   beforeAll(async () => {
+    await resComparePasswordMock();
+    mockedPassword = await resHashedPasswordMock('passWord58');
     invalidTypeLimit = 'limite';
     invalidTypePage = 'pagina';
     await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+      password: mockedPassword,
       email: 'success.user@wolox.com.ar'
     });
     token = await request(app)

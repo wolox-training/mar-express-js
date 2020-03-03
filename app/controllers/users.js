@@ -75,17 +75,23 @@ exports.signInUser = (req, res, next) => {
   return findByEmail(mappedData.email)
     .then(user => {
       if (user) {
-        return bcrypt.compare(mappedData.password, user.password).then(result => {
-          if (result) {
-            const token = jwt.sign(
-              { id: user.id, firstName: user.firstName, lastName: user.lastName, admin: user.admin },
-              process.env.TOKEN_SECRET
-            );
-            res.status(200).send({ token });
-          } else {
+        return bcrypt
+          .compare(mappedData.password, user.password)
+          .then(result => {
+            if (result) {
+              const token = jwt.sign(
+                { id: user.id, firstName: user.firstName, lastName: user.lastName, admin: user.admin },
+                process.env.TOKEN_SECRET
+              );
+              res.status(200).send({ token });
+            } else {
+              throw userLoginError('Authentication failed: Invalid Credentials');
+            }
+          })
+          .catch(err => {
+            logger.error(util.inspect(err));
             throw userLoginError('Authentication failed: Invalid Credentials');
-          }
-        });
+          });
       }
       throw userLoginError('Authentication failed: Invalid Credentials');
     })

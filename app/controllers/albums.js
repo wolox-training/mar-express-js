@@ -1,12 +1,7 @@
-const util = require('util');
-
 const albumsService = require('../services/albums');
 const logger = require('../logger');
-const error = require('../errors');
 
-const { apiAlbumsError, existingAlbumError } = error;
-
-const { listAlbums, listAlbumPhotos, getAlbumData, createAlbum, findAlbum } = albumsService;
+const { listAlbums, listAlbumPhotos, getAlbumData, findOrCreateAlbum } = albumsService;
 
 exports.getAlbums = (req, res, next) =>
   listAlbums()
@@ -21,28 +16,13 @@ exports.getAlbumPhotos = (req, res, next) =>
 exports.buyAlbum = (req, res, next) =>
   getAlbumData(req.params.id)
     .then(albumData =>
-      findAlbum(albumData.id, req.user.id).then(existingAlbum => {
-        if (existingAlbum) {
-          throw existingAlbumError(
-            `Album not bought: user ${req.user.firstName} ${req.user.lastName} already had '${albumData.title}'.`
+      findOrCreateAlbum(albumData, req.user)
+        .then(result => {
+          logger.info(
+            `Album bought: user ${req.user.firstName} ${req.user.lastName} now has '${result.title}'`
           );
-        } else {
-          return createAlbum(req.user.id, albumData.id, albumData.title)
-            .then(album => {
-              logger.info(
-                `Album bought: user ${req.user.firstName} ${req.user.lastName} now has '${albumData.title}'`
-              );
-              res.status(201).send(album);
-            })
-            .catch(next);
-        }
-      })
+          res.status(201).send(result);
+        })
+        .catch(next)
     )
-    .catch(err => {
-      logger.error(util.inspect(err));
-      if (err.internalCode === 'api_albums_error') {
-        throw apiAlbumsError('Album not bought: could not find album');
-      }
-      throw existingAlbumError(err.message);
-    })
     .catch(next);

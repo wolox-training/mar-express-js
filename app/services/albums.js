@@ -8,7 +8,7 @@ const error = require('../errors');
 const Album = require('../models').albums;
 
 const { url } = config.common.albums;
-const { apiAlbumsError } = error;
+const { apiAlbumsError, existingAlbumError } = error;
 
 exports.listAlbums = () =>
   rp({
@@ -40,26 +40,27 @@ exports.getAlbumData = async albumId => {
     return albumDataResponse.body;
   } catch (err) {
     logger.error(util.inspect(err));
-    throw apiAlbumsError(err.message);
+    throw apiAlbumsError('Album not bought: could not find album');
   }
 };
 
-exports.createAlbum = async (userId, albumId, title) => {
+exports.findOrCreateAlbum = async (albumData, user) => {
   try {
-    const album = await Album.create({ userId, albumId, title });
-    return album;
+    const result = await Album.findOrCreate({
+      where: { albumId: albumData.id, userId: user.id },
+      defaults: { albumId: albumData.id, title: albumData.title, userId: user.id }
+    }).spread((album, created) => ({
+      album,
+      created
+    }));
+    if (result.created) {
+      return result.album;
+    }
+    throw existingAlbumError(
+      `Album not bought: user ${user.firstName} ${user.lastName} already had '${result.album.title}'.`
+    );
   } catch (err) {
     logger.error(util.inspect(err));
-    throw apiAlbumsError(err.message);
-  }
-};
-
-exports.findAlbum = async (albumId, userId) => {
-  try {
-    const album = await Album.findOne({ where: { albumId, userId } });
-    return album;
-  } catch (err) {
-    logger.error(util.inspect(err));
-    throw apiAlbumsError(err.message);
+    throw existingAlbumError(err.message);
   }
 };

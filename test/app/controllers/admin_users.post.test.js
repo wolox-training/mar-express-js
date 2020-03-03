@@ -1,17 +1,18 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
 
+const { resHashedPasswordMock, resComparePasswordMock } = require('../../mocks/bcrypt');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { adminUserSignUpErrorMessages } = require('../../errors/user');
-
-const { saltRounds } = config.common.bcrypt;
 
 factoryByModel('users');
 
 describe('POST /admin/users', () => {
+  let mockedAdminPass = {};
+  let mockedUpdatePass = {};
+  let mockedRepeatedPass = {};
+  let mockedExistingPass = {};
   let responseKeys = {};
   let updateResponseKeys = {};
   let token = {};
@@ -28,6 +29,11 @@ describe('POST /admin/users', () => {
   let userCreationErrorCode = {};
   let userLoginErrorCode = {};
   beforeAll(async () => {
+    await resComparePasswordMock();
+    mockedAdminPass = await resHashedPasswordMock('adminPass60');
+    mockedUpdatePass = await resHashedPasswordMock('updateUserPass60');
+    mockedRepeatedPass = await resHashedPasswordMock('passWord58');
+    mockedExistingPass = await resHashedPasswordMock('existingUserPass60');
     responseKeys = await [
       'id',
       'firstName',
@@ -50,7 +56,7 @@ describe('POST /admin/users', () => {
       'updatedAt'
     ];
     await factory.create('users', {
-      password: bcrypt.hash('adminPass60', saltRounds),
+      password: mockedAdminPass,
       email: 'admin@wolox.com.ar',
       admin: true
     });
@@ -74,7 +80,7 @@ describe('POST /admin/users', () => {
         password: successUser.password
       });
     updateUser = await factory.create('users', {
-      password: bcrypt.hash('updateUserPass60', saltRounds),
+      password: mockedUpdatePass,
       email: 'update.user@wolox.com.ar',
       admin: false
     });
@@ -88,7 +94,7 @@ describe('POST /admin/users', () => {
         password: 'updateUserPass60'
       });
     await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+      password: mockedRepeatedPass,
       email: 'repeated@wolox.com.ar',
       admin: true
     });
@@ -116,7 +122,7 @@ describe('POST /admin/users', () => {
         password: failureUser.password
       });
     await factory.create('users', {
-      password: bcrypt.hash('existingUserPass60', saltRounds),
+      password: mockedExistingPass,
       email: 'existing.user@wolox.com.ar',
       admin: false
     });

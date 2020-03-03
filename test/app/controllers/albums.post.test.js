@@ -1,27 +1,16 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
-const nock = require('nock');
 
+const { resHashedPasswordMock, resComparePasswordMock } = require('../../mocks/bcrypt');
+const { albumResValueMock, albumRejValueMock } = require('../../mocks/albums');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { albumsErrorMessages } = require('../../errors/albums');
-
-const { saltRounds } = config.common.bcrypt;
-
-nock('https://jsonplaceholder.typicode.com')
-  .persist()
-  .get('/albums/1')
-  .reply(200, {
-    userId: 1,
-    id: 1,
-    title: 'mocked book'
-  });
 
 factoryByModel('users');
 
 describe('POST /albums/:id', () => {
+  let mockedPassword = {};
   let responseKeys = {};
   let successResponse = {};
   let existingAlbumResponse = {};
@@ -31,12 +20,15 @@ describe('POST /albums/:id', () => {
   let successAlbumId = {};
   let albumCreationErrorCode = {};
   let albumNotFoundErrorCode = {};
+  let successResponseBody = {};
   beforeAll(async () => {
-    responseKeys = ['id', 'userId', 'albumId', 'title', 'updatedAt', 'createdAt', 'deleted_at'];
+    await resComparePasswordMock();
+    mockedPassword = await resHashedPasswordMock('adminPass60');
+    responseKeys = ['id', 'albumId', 'title', 'userId', 'updatedAt', 'createdAt', 'deleted_at'];
     adminUser = await factory.create('users', {
       firstName: 'Alberto',
       lastName: 'Alvarez',
-      password: bcrypt.hash('adminPass60', saltRounds),
+      password: mockedPassword,
       email: 'admin@wolox.com.ar',
       admin: true
     });
@@ -48,12 +40,19 @@ describe('POST /albums/:id', () => {
       })
       .then(response => response.body.token);
     successAlbumId = 1;
+    successResponseBody = await {
+      userId: 1,
+      id: 1,
+      title: 'mocked book'
+    };
+    await albumResValueMock(successResponseBody);
     successResponse = await request(app)
       .post(`/albums/${successAlbumId}`)
       .set('Authorization', token);
     existingAlbumResponse = await request(app)
       .post(`/albums/${successAlbumId}`)
       .set('Authorization', token);
+    await albumRejValueMock({});
     albumNotFoundResponse = await request(app)
       .post('/albums/500')
       .set('Authorization', token);
