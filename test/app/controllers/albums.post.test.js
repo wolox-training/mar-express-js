@@ -1,8 +1,9 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
 
-const { resHashedPasswordMock, resComparePasswordMock } = require('../../mocks/bcrypt');
-const { albumResValueMock, albumRejValueMock } = require('../../mocks/albums');
+const { succeedJWTVerifyMock } = require('../../mocks/jwt');
+const { resolveHashPasswordMock } = require('../../mocks/bcrypt');
+const { succeedGetAlbumMock, failedGetAlbumMock } = require('../../mocks/albums');
 const app = require('../../../app');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { albumsErrorMessages } = require('../../errors/albums');
@@ -11,6 +12,7 @@ factoryByModel('users');
 
 describe('POST /albums/:id', () => {
   let mockedPassword = {};
+  let verificationResponse = {};
   let responseKeys = {};
   let successResponse = {};
   let existingAlbumResponse = {};
@@ -22,8 +24,7 @@ describe('POST /albums/:id', () => {
   let albumNotFoundErrorCode = {};
   let successResponseBody = {};
   beforeAll(async () => {
-    await resComparePasswordMock();
-    mockedPassword = await resHashedPasswordMock('adminPass60');
+    mockedPassword = await resolveHashPasswordMock('adminPass60');
     responseKeys = ['id', 'albumId', 'title', 'userId', 'updatedAt', 'createdAt', 'deleted_at'];
     adminUser = await factory.create('users', {
       firstName: 'Alberto',
@@ -32,27 +33,31 @@ describe('POST /albums/:id', () => {
       email: 'admin@wolox.com.ar',
       admin: true
     });
-    token = await request(app)
-      .post('/users/sessions')
-      .send({
-        email: 'admin@wolox.com.ar',
-        password: 'adminPass60'
-      })
-      .then(response => response.body.token);
+    token = 'signed-token';
     successAlbumId = 1;
     successResponseBody = await {
       userId: 1,
       id: 1,
       title: 'mocked book'
     };
-    await albumResValueMock(successResponseBody);
+    verificationResponse = await {
+      id: adminUser.id,
+      firstName: adminUser.firstName,
+      lastName: adminUser.lastName,
+      admin: adminUser.admin
+    };
+    await succeedJWTVerifyMock(verificationResponse);
+    await succeedGetAlbumMock(successResponseBody);
     successResponse = await request(app)
       .post(`/albums/${successAlbumId}`)
       .set('Authorization', token);
+    await succeedJWTVerifyMock(verificationResponse);
+    await succeedGetAlbumMock(successResponseBody);
     existingAlbumResponse = await request(app)
       .post(`/albums/${successAlbumId}`)
       .set('Authorization', token);
-    await albumRejValueMock({});
+    await succeedJWTVerifyMock(verificationResponse);
+    await failedGetAlbumMock({});
     albumNotFoundResponse = await request(app)
       .post('/albums/500')
       .set('Authorization', token);
@@ -74,8 +79,8 @@ describe('POST /albums/:id', () => {
   });
   describe('Failure cases', () => {
     describe('Does not create a new album if the user already bought it', () => {
-      it('should have status code 500', () => {
-        expect(existingAlbumResponse.statusCode).toEqual(500);
+      it('should have status code 409', () => {
+        expect(existingAlbumResponse.statusCode).toEqual(409);
       });
       it('should respond with album creation error message', () => {
         expect(existingAlbumResponse.body.message).toEqual(albumsErrorMessages.existingAlbumErrorMessage);

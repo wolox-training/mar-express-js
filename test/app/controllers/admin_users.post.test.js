@@ -1,7 +1,8 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
 
-const { resHashedPasswordMock, resComparePasswordMock } = require('../../mocks/bcrypt');
+const { succeedJWTVerifyMock, failedJWTVerifyMock } = require('../../mocks/jwt');
+const { resHashedPasswordMock /* , resComparePasswordMock */ } = require('../../mocks/bcrypt');
 const app = require('../../../app');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { adminUserSignUpErrorMessages } = require('../../errors/user');
@@ -9,17 +10,19 @@ const { adminUserSignUpErrorMessages } = require('../../errors/user');
 factoryByModel('users');
 
 describe('POST /admin/users', () => {
-  let mockedAdminPass = {};
-  let mockedUpdatePass = {};
-  let mockedRepeatedPass = {};
-  let mockedExistingPass = {};
+  // let mockedAdminPass = {};
+  // let mockedUpdatePass = {};
+  // let mockedRepeatedPass = {};
+  // let mockedExistingPass = {};
+  let mockedPassword = {};
+  let verificationResponse = {};
   let responseKeys = {};
   let updateResponseKeys = {};
   let token = {};
   let failedToken = {};
   let successUser = {};
   let updateUser = {};
-  let repeatedEmailUser = {};
+  // const repeatedEmailUser = {};
   let failureUser = {};
   let successResponse = {};
   let successUpdateResponse = {};
@@ -29,11 +32,6 @@ describe('POST /admin/users', () => {
   let userCreationErrorCode = {};
   let userLoginErrorCode = {};
   beforeAll(async () => {
-    await resComparePasswordMock();
-    mockedAdminPass = await resHashedPasswordMock('adminPass60');
-    mockedUpdatePass = await resHashedPasswordMock('updateUserPass60');
-    mockedRepeatedPass = await resHashedPasswordMock('passWord58');
-    mockedExistingPass = await resHashedPasswordMock('existingUserPass60');
     responseKeys = await [
       'id',
       'firstName',
@@ -55,21 +53,17 @@ describe('POST /admin/users', () => {
       'createdAt',
       'updatedAt'
     ];
-    await factory.create('users', {
-      password: mockedAdminPass,
-      email: 'admin@wolox.com.ar',
+    verificationResponse = await {
+      id: 1,
+      firstName: 'admin',
+      lastName: 'admin',
       admin: true
-    });
-    token = await request(app)
-      .post('/users/sessions')
-      .send({
-        email: 'admin@wolox.com.ar',
-        password: 'adminPass60'
-      })
-      .then(response => response.body.token);
+    };
+    token = 'signed-token';
     successUser = await factory.build('users').then(dummy => dummy.dataValues);
     successUser.password = 'passWord58';
     successUser.email += '@wolox.com.ar';
+    await succeedJWTVerifyMock(verificationResponse);
     successResponse = await request(app)
       .post('/admin/users')
       .set('Authorization', token)
@@ -79,11 +73,13 @@ describe('POST /admin/users', () => {
         email: successUser.email,
         password: successUser.password
       });
+    mockedPassword = await resHashedPasswordMock('updateUserPass60');
     updateUser = await factory.create('users', {
-      password: mockedUpdatePass,
+      password: mockedPassword,
       email: 'update.user@wolox.com.ar',
       admin: false
     });
+    await succeedJWTVerifyMock(verificationResponse);
     successUpdateResponse = await request(app)
       .post('/admin/users')
       .set('Authorization', token)
@@ -93,26 +89,20 @@ describe('POST /admin/users', () => {
         email: updateUser.email,
         password: 'updateUserPass60'
       });
-    await factory.create('users', {
-      password: mockedRepeatedPass,
-      email: 'repeated@wolox.com.ar',
-      admin: true
-    });
-    repeatedEmailUser = await factory.build('users').then(dummy => dummy.dataValues);
-    repeatedEmailUser.password = 'passWord58';
-    repeatedEmailUser.email = 'repeated@wolox.com.ar';
+    await succeedJWTVerifyMock(verificationResponse);
     repeatedEmailResponse = await request(app)
       .post('/admin/users')
       .set('Authorization', token)
       .send({
-        first_name: repeatedEmailUser.firstName,
-        last_name: repeatedEmailUser.lastName,
-        email: repeatedEmailUser.email,
-        password: repeatedEmailUser.password
+        first_name: updateUser.firstName,
+        last_name: updateUser.lastName,
+        email: updateUser.email,
+        password: updateUser.password
       });
     failureUser = await factory.build('users').then(dummy => dummy.dataValues);
     failureUser.password = 'failurePass';
     failureUser.email = 'failure@wolox.com.ar';
+    await failedJWTVerifyMock('No user');
     noUserResponse = await request(app)
       .post('/admin/users')
       .send({
@@ -121,18 +111,8 @@ describe('POST /admin/users', () => {
         email: failureUser.email,
         password: failureUser.password
       });
-    await factory.create('users', {
-      password: mockedExistingPass,
-      email: 'existing.user@wolox.com.ar',
-      admin: false
-    });
-    failedToken = await request(app)
-      .post('/users/sessions')
-      .send({
-        email: 'existing.user@wolox.com.ar',
-        password: 'existingUserPass60'
-      })
-      .then(response => response.body.token);
+    failedToken = 'failed-token';
+    await failedJWTVerifyMock('No admin user');
     noAdminUserResponse = await request(app)
       .post('/admin/users')
       .set('Authorization', failedToken)

@@ -1,12 +1,8 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const jwt = require('jsonwebtoken');
 
-const {
-  resHashedPasswordMock,
-  resComparePasswordMock,
-  rejComparePasswordMock
-} = require('../../mocks/bcrypt');
+const { resolveComparePasswordMock, resolveHashPasswordMock } = require('../../mocks/bcrypt');
+const { succeedJWTSignMock } = require('../../mocks/jwt');
 const app = require('../../../app');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { userSignUpErrorsMessages, userSignInErrorsMessages } = require('../../errors/user');
@@ -22,7 +18,7 @@ describe('POST /users', () => {
   let repeatedEmailResponse = {};
   let userCreationErrorCode = {};
   beforeAll(async () => {
-    mockedPassword = await resHashedPasswordMock('passWord58');
+    mockedPassword = await resolveHashPasswordMock('passWord58');
     responseKeys = await [
       'id',
       'firstName',
@@ -95,41 +91,33 @@ describe('POST /users', () => {
 
 describe('POST /users/sessions', () => {
   let mockedPassword = {};
-  let successUser = {};
   let responseToken = {};
   let successResponse = {};
   let unregisterdUserResponse = {};
   let wrongPasswordResponse = {};
   let userLoginErrorCode = {};
   beforeAll(async () => {
-    mockedPassword = await resHashedPasswordMock('passWord58');
-    successUser = await factory.create('users', {
+    mockedPassword = await resolveHashPasswordMock('passWord58');
+    await factory.create('users', {
       password: mockedPassword,
       email: 'fake@wolox.com.ar'
     });
-    await resComparePasswordMock();
+    await resolveComparePasswordMock(true);
+    await succeedJWTSignMock('signed-token');
     successResponse = await request(app)
       .post('/users/sessions')
       .send({
         email: 'fake@wolox.com.ar',
         password: 'passWord58'
       });
-    responseToken = jwt.sign(
-      {
-        id: successUser.id,
-        firstName: successUser.firstName,
-        lastName: successUser.lastName,
-        admin: successUser.admin
-      },
-      process.env.TOKEN_SECRET
-    );
+    responseToken = 'signed-token';
     unregisterdUserResponse = await request(app)
       .post('/users/sessions')
       .send({
         email: 'unregisterd@wolox.com.ar',
         password: 'unregistered'
       });
-    await rejComparePasswordMock();
+    await resolveComparePasswordMock(false);
     wrongPasswordResponse = await request(app)
       .post('/users/sessions')
       .send({

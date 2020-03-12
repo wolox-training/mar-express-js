@@ -1,7 +1,7 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
 
-const { resHashedPasswordMock } = require('../../mocks/bcrypt');
+const { resolveHashPasswordMock } = require('../../mocks/bcrypt');
 const app = require('../../../app');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { userSignUpErrorsMessages, userSignInErrorsMessages } = require('../../errors/user');
@@ -123,7 +123,7 @@ describe('POST /users/sessions (VALIDATION)', () => {
   let invalidEmailResponse = {};
   let invalidPasswordResponse = {};
   beforeAll(async () => {
-    mockedPassword = await resHashedPasswordMock('passWord58');
+    mockedPassword = await resolveHashPasswordMock('passWord58');
     await factory.create('users', {
       password: mockedPassword,
       email: 'fake@wolox.com.ar'

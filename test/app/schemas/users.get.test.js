@@ -1,7 +1,7 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
 
-const { resHashedPasswordMock, resComparePasswordMock } = require('../../mocks/bcrypt');
+const { resolveHashPasswordMock, resolveComparePasswordMock } = require('../../mocks/bcrypt');
 const app = require('../../../app');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const {
@@ -21,8 +21,8 @@ describe('GET /users (VALIDATION)', () => {
   let invalidLimitResponse = {};
   let invalidPageResponse = {};
   beforeAll(async () => {
-    await resComparePasswordMock();
-    mockedPassword = await resHashedPasswordMock('passWord58');
+    await resolveComparePasswordMock(true);
+    mockedPassword = await resolveHashPasswordMock('passWord58');
     invalidTypeLimit = 'limite';
     invalidTypePage = 'pagina';
     await factory.create('users', {
