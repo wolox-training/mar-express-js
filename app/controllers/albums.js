@@ -15,14 +15,12 @@ exports.getAlbumPhotos = (req, res, next) =>
 
 exports.buyAlbum = (req, res, next) =>
   getAlbumData(req.params.id)
-    .then(
-      albumData =>
-        findOrCreateAlbum(albumData, req.user).then(result => {
-          logger.info(
-            `Album bought: user ${req.user.firstName} ${req.user.lastName} now has '${result.title}'`
-          );
-          res.status(201).send(result);
-        })
-      // .catch(next)
+    .then(albumData =>
+      findOrCreateAlbum(albumData, req.user).then(result => {
+        logger.info(
+          `Album bought: user ${req.user.firstName} ${req.user.lastName} now has '${result.title}'`
+        );
+        res.status(201).send(result);
+      })
     )
     .catch(next);
