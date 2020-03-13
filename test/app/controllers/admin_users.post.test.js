@@ -1,8 +1,7 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
 
-const { succeedJWTVerifyMock, failedJWTVerifyMock } = require('../../mocks/jwt');
-const { resHashedPasswordMock /* , resComparePasswordMock */ } = require('../../mocks/bcrypt');
+const { failedJWTVerifyMock, succeedJWTVerifyMock } = require('../../mocks/jwt');
 const app = require('../../../app');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { adminUserSignUpErrorMessages } = require('../../errors/user');
@@ -10,27 +9,19 @@ const { adminUserSignUpErrorMessages } = require('../../errors/user');
 factoryByModel('users');
 
 describe('POST /admin/users', () => {
-  // let mockedAdminPass = {};
-  // let mockedUpdatePass = {};
-  // let mockedRepeatedPass = {};
-  // let mockedExistingPass = {};
-  let mockedPassword = {};
-  let verificationResponse = {};
   let responseKeys = {};
   let updateResponseKeys = {};
-  let token = {};
-  let failedToken = {};
-  let successUser = {};
-  let updateUser = {};
-  // const repeatedEmailUser = {};
-  let failureUser = {};
-  let successResponse = {};
-  let successUpdateResponse = {};
-  let repeatedEmailResponse = {};
-  let noUserResponse = {};
-  let noAdminUserResponse = {};
   let userCreationErrorCode = {};
   let userLoginErrorCode = {};
+  let adminVerification = {};
+  let successUser = {};
+  let successResponse = {};
+  let updateUser = {};
+  let successUpdateResponse = {};
+  let repeatedUser = {};
+  let repeatedEmailResponse = {};
+  let failedUser = {};
+  let noAuthenticatedUserResponse = {};
   beforeAll(async () => {
     responseKeys = await [
       'id',
@@ -53,77 +44,66 @@ describe('POST /admin/users', () => {
       'createdAt',
       'updatedAt'
     ];
-    verificationResponse = await {
+    userCreationErrorCode = 'user_creation_error';
+    userLoginErrorCode = 'user_login_error';
+    adminVerification = {
       id: 1,
       firstName: 'admin',
-      lastName: 'admin',
+      lastname: 'user',
       admin: true
     };
-    token = 'signed-token';
     successUser = await factory.build('users').then(dummy => dummy.dataValues);
     successUser.password = 'passWord58';
     successUser.email += '@wolox.com.ar';
-    await succeedJWTVerifyMock(verificationResponse);
+    await succeedJWTVerifyMock(adminVerification);
     successResponse = await request(app)
       .post('/admin/users')
-      .set('Authorization', token)
       .send({
         first_name: successUser.firstName,
         last_name: successUser.lastName,
         email: successUser.email,
         password: successUser.password
       });
-    mockedPassword = await resHashedPasswordMock('updateUserPass60');
     updateUser = await factory.create('users', {
-      password: mockedPassword,
       email: 'update.user@wolox.com.ar',
+      password: 'passWord59',
       admin: false
     });
-    await succeedJWTVerifyMock(verificationResponse);
+    await succeedJWTVerifyMock(adminVerification);
     successUpdateResponse = await request(app)
       .post('/admin/users')
-      .set('Authorization', token)
-      .send({
-        first_name: updateUser.firstName,
-        last_name: updateUser.lastName,
-        email: updateUser.email,
-        password: 'updateUserPass60'
-      });
-    await succeedJWTVerifyMock(verificationResponse);
-    repeatedEmailResponse = await request(app)
-      .post('/admin/users')
-      .set('Authorization', token)
       .send({
         first_name: updateUser.firstName,
         last_name: updateUser.lastName,
         email: updateUser.email,
         password: updateUser.password
       });
-    failureUser = await factory.build('users').then(dummy => dummy.dataValues);
-    failureUser.password = 'failurePass';
-    failureUser.email = 'failure@wolox.com.ar';
-    await failedJWTVerifyMock('No user');
-    noUserResponse = await request(app)
+    repeatedUser = await factory.create('users', {
+      email: 'repeated@wolox.com.ar',
+      password: 'passWord60',
+      admin: true
+    });
+    await succeedJWTVerifyMock(adminVerification);
+    repeatedEmailResponse = await request(app)
       .post('/admin/users')
       .send({
-        firstName: failureUser.firstName,
-        lastName: failureUser.lastName,
-        email: failureUser.email,
-        password: failureUser.password
+        first_name: repeatedUser.firstName,
+        last_name: repeatedUser.lastName,
+        email: repeatedUser.email,
+        password: repeatedUser.password
       });
-    failedToken = 'failed-token';
-    await failedJWTVerifyMock('No admin user');
-    noAdminUserResponse = await request(app)
+    failedUser = await factory.build('users').then(dummy => dummy.dataValues);
+    failedUser.password = 'passWord61';
+    failedUser.email += '@wolox.com.ar';
+    await failedJWTVerifyMock('Authentication failed!');
+    noAuthenticatedUserResponse = await request(app)
       .post('/admin/users')
-      .set('Authorization', failedToken)
       .send({
-        firstName: failureUser.firstName,
-        lastName: failureUser.lastName,
-        email: failureUser.email,
-        password: failureUser.password
+        first_name: failedUser.firstName,
+        last_name: failedUser.lastName,
+        email: failedUser.email,
+        password: failedUser.password
       });
-    userCreationErrorCode = 'user_creation_error';
-    userLoginErrorCode = 'user_login_error';
   });
   describe('Successful cases', () => {
     describe('Creates a new admin user when request has valid parameters', () => {
@@ -164,28 +144,17 @@ describe('POST /admin/users', () => {
         expect(repeatedEmailResponse.body.internal_code).toEqual(userCreationErrorCode);
       });
     });
-    describe('Creation fails when the there is no user authenticated', () => {
-      it('should have status code 401', () => {
-        expect(noUserResponse.statusCode).toEqual(401);
-      });
-      it('should respond with failed authentication error message', () => {
-        expect(noUserResponse.body.message).toEqual(adminUserSignUpErrorMessages.unauthorizedErrorMessage);
-      });
-      it('should respond with login error internal code', () => {
-        expect(noUserResponse.body.internal_code).toEqual(userLoginErrorCode);
-      });
-    });
     describe('Creation fails when the there is no admin user authenticated', () => {
       it('should have status code 401', () => {
-        expect(noAdminUserResponse.statusCode).toEqual(401);
+        expect(noAuthenticatedUserResponse.statusCode).toEqual(401);
       });
       it('should respond with failed authentication error message', () => {
-        expect(noAdminUserResponse.body.message).toEqual(
-          adminUserSignUpErrorMessages.unauthorizedUserErrorMessage
+        expect(noAuthenticatedUserResponse.body.message).toEqual(
+          adminUserSignUpErrorMessages.unauthorizedErrorMessage
         );
       });
       it('should respond with login error internal code', () => {
-        expect(noAdminUserResponse.body.internal_code).toEqual(userLoginErrorCode);
+        expect(noAuthenticatedUserResponse.body.internal_code).toEqual(userLoginErrorCode);
       });
     });
   });
