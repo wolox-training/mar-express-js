@@ -8,7 +8,7 @@ const error = require('../errors');
 const Album = require('../models').albums;
 
 const { url } = config.common.albums;
-const { apiAlbumsError, existingAlbumError } = error;
+const { apiAlbumsServiceError, apiAlbumNotFoundError, existingAlbumError } = error;
 
 exports.listAlbums = () =>
   rp({
@@ -17,7 +17,10 @@ exports.listAlbums = () =>
     json: true
   }).catch(err => {
     logger.error(util.inspect(err));
-    throw apiAlbumsError(err.message);
+    if (err.statusCode === 404) {
+      throw apiAlbumNotFoundError('Album not bought: could not find album');
+    }
+    throw apiAlbumsServiceError('Album not bought: external service error');
   });
 
 exports.listAlbumPhotos = albumId =>
@@ -27,7 +30,10 @@ exports.listAlbumPhotos = albumId =>
     json: true
   }).catch(err => {
     logger.error(util.inspect(err));
-    throw apiAlbumsError(err.message);
+    if (err.statusCode === 404) {
+      throw apiAlbumNotFoundError('Album not bought: could not find album');
+    }
+    throw apiAlbumsServiceError('Album not bought: external service error');
   });
 
 exports.getAlbumData = async albumId => {
@@ -40,24 +46,24 @@ exports.getAlbumData = async albumId => {
     return albumDataResponse.body;
   } catch (err) {
     logger.error(util.inspect(err));
-    throw apiAlbumsError('Album not bought: could not find album');
+    if (err.statusCode === 404) {
+      throw apiAlbumNotFoundError('Album not bought: could not find album');
+    }
+    throw apiAlbumsServiceError('Album not bought: external service error');
   }
 };
 
 exports.findOrCreateAlbum = async (albumData, user) => {
   try {
-    const result = await Album.findOrCreate({
+    const [album, created] = await Album.findOrCreate({
       where: { albumId: albumData.id, userId: user.id },
       defaults: { albumId: albumData.id, title: albumData.title, userId: user.id }
-    }).spread((album, created) => ({
-      album,
-      created
-    }));
-    if (result.created) {
-      return result.album;
+    });
+    if (created) {
+      return album;
     }
     throw existingAlbumError(
-      `Album not bought: user ${user.firstName} ${user.lastName} already had '${result.album.title}'.`
+      `Album not bought: user ${user.firstName} ${user.lastName} already had '${album.title}'.`
     );
   } catch (err) {
     logger.error(util.inspect(err));
