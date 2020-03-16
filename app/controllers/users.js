@@ -1,18 +1,18 @@
 const { signUpMapper, signInMapper } = require('../mappers/post_mappers');
 const { listUsersMapper } = require('../mappers/get_mappers');
-const { createNewUser, createNewAdminUser, listUsers, signInIfUserExists } = require('../services/users');
+const { createNewUser, listUsers, signInIfUserExists } = require('../services/users');
 
 exports.signUpUser = (req, res, next) => {
   const mappedData = signUpMapper(req.body);
-  return createNewUser(mappedData)
+  return createNewUser(mappedData, false)
     .then(user => res.status(201).send(user))
     .catch(next);
 };
 
 exports.signUpAdminUser = (req, res, next) => {
   const mappedData = signUpMapper(req.body);
-  return createNewAdminUser(mappedData)
-    .then(response => res.status(response.status).send(response.admin))
+  return createNewUser(mappedData, true)
+    .then(response => res.status(response.status).send(response.adminUser))
     .catch(next);
 };
 

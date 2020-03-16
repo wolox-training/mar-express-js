@@ -10,31 +10,27 @@ const Album = require('../models').albums;
 const { url } = config.common.albums;
 const { apiAlbumsServiceError, apiAlbumNotFoundError, existingAlbumError } = error;
 
+const handleApiError = err => {
+  logger.error(util.inspect(err));
+  if (err.statusCode === 404) {
+    throw apiAlbumNotFoundError('Album not bought: could not find album');
+  }
+  throw apiAlbumsServiceError('Album not bought: external service error');
+};
+
 exports.listAlbums = () =>
   rp({
     uri: `${url}/albums`,
     resolveWithFullResponse: true,
     json: true
-  }).catch(err => {
-    logger.error(util.inspect(err));
-    if (err.statusCode === 404) {
-      throw apiAlbumNotFoundError('Album not bought: could not find album');
-    }
-    throw apiAlbumsServiceError('Album not bought: external service error');
-  });
+  }).catch(err => handleApiError(err));
 
 exports.listAlbumPhotos = albumId =>
   rp({
     uri: `${url}/photos?albumId=${albumId}`,
     resolveWithFullResponse: true,
     json: true
-  }).catch(err => {
-    logger.error(util.inspect(err));
-    if (err.statusCode === 404) {
-      throw apiAlbumNotFoundError('Album not bought: could not find album');
-    }
-    throw apiAlbumsServiceError('Album not bought: external service error');
-  });
+  }).catch(err => handleApiError(err));
 
 exports.getAlbumData = async albumId => {
   try {
@@ -45,11 +41,7 @@ exports.getAlbumData = async albumId => {
     });
     return albumDataResponse.body;
   } catch (err) {
-    logger.error(util.inspect(err));
-    if (err.statusCode === 404) {
-      throw apiAlbumNotFoundError('Album not bought: could not find album');
-    }
-    throw apiAlbumsServiceError('Album not bought: external service error');
+    return handleApiError(err);
   }
 };
 

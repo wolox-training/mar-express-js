@@ -10,5 +10,6 @@ module.exports = {
       album_id: { type: Sequelize.INTEGER, allowNull: false },
       title: { type: Sequelize.STRING, allowNull: false },
       user_id: { type: Sequelize.INTEGER, allowNull: false }
-    })
+    }),
+  down: queryInterface => queryInterface.dropTable('albums')
 };
