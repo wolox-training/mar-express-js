@@ -1,13 +1,11 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
 
+const { resolveHashPasswordMock } = require('../../mocks/bcrypt');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { userSignUpErrorsMessages, userSignInErrorsMessages } = require('../../errors/user');
 
-const { saltRounds } = config.common.bcrypt;
 const validationErrorCode = 'validation_error';
 
 factoryByModel('users');
@@ -120,12 +118,14 @@ describe('POST /users (VALIDATION)', () => {
 });
 
 describe('POST /users/sessions (VALIDATION)', () => {
+  let mockedPassword = {};
   let emptyParamsResponse = {};
   let invalidEmailResponse = {};
   let invalidPasswordResponse = {};
   beforeAll(async () => {
+    mockedPassword = await resolveHashPasswordMock('passWord58');
     await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+      password: mockedPassword,
       email: 'fake@wolox.com.ar'
     });
     emptyParamsResponse = await request(app)

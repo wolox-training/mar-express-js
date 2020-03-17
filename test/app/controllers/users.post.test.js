@@ -1,18 +1,16 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
+const { resolveComparePasswordMock, resolveHashPasswordMock } = require('../../mocks/bcrypt');
+const { succeedJWTSignMock } = require('../../mocks/jwt');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { userSignUpErrorsMessages, userSignInErrorsMessages } = require('../../errors/user');
-
-const { saltRounds } = config.common.bcrypt;
 
 factoryByModel('users');
 
 describe('POST /users', () => {
+  let mockedPassword = {};
   let responseKeys = {};
   let successUser = {};
   let repeatedEmailUser = {};
@@ -20,6 +18,7 @@ describe('POST /users', () => {
   let repeatedEmailResponse = {};
   let userCreationErrorCode = {};
   beforeAll(async () => {
+    mockedPassword = await resolveHashPasswordMock('passWord58');
     responseKeys = await [
       'id',
       'firstName',
@@ -43,7 +42,7 @@ describe('POST /users', () => {
         password: successUser.password
       });
     await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+      password: mockedPassword,
       email: 'repeated@wolox.com.ar'
     });
     repeatedEmailUser = await factory.build('users').then(dummy => dummy.dataValues);
@@ -91,38 +90,34 @@ describe('POST /users', () => {
 });
 
 describe('POST /users/sessions', () => {
-  let successUser = {};
+  let mockedPassword = {};
   let responseToken = {};
   let successResponse = {};
   let unregisterdUserResponse = {};
   let wrongPasswordResponse = {};
   let userLoginErrorCode = {};
   beforeAll(async () => {
-    successUser = await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+    mockedPassword = await resolveHashPasswordMock('passWord58');
+    await factory.create('users', {
+      password: mockedPassword,
       email: 'fake@wolox.com.ar'
     });
+    await resolveComparePasswordMock(true);
+    await succeedJWTSignMock('signed-token');
     successResponse = await request(app)
       .post('/users/sessions')
       .send({
         email: 'fake@wolox.com.ar',
         password: 'passWord58'
       });
-    responseToken = jwt.sign(
-      {
-        id: successUser.id,
-        firstName: successUser.firstName,
-        lastName: successUser.lastName,
-        admin: successUser.admin
-      },
-      process.env.TOKEN_SECRET
-    );
+    responseToken = 'signed-token';
     unregisterdUserResponse = await request(app)
       .post('/users/sessions')
       .send({
         email: 'unregisterd@wolox.com.ar',
         password: 'unregistered'
       });
+    await resolveComparePasswordMock(false);
     wrongPasswordResponse = await request(app)
       .post('/users/sessions')
       .send({

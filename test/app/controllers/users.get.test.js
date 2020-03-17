@@ -1,13 +1,11 @@
 const request = require('supertest');
 const { factory } = require('factory-girl');
-const bcrypt = require('bcrypt');
 
+const { succeedJWTVerifyMock, failedJWTVerifyMock } = require('../../mocks/jwt');
+const { resolveComparePasswordMock, resolveHashPasswordMock } = require('../../mocks/bcrypt');
 const app = require('../../../app');
-const config = require('../../../config/index');
 const { factoryByModel } = require('../../factory/factory_by_models');
 const { authFailedErrorMessage } = require('../../errors/user').usersListErrorMessages;
-
-const { saltRounds } = config.common.bcrypt;
 
 factoryByModel('users');
 
@@ -16,6 +14,8 @@ describe('GET /users', () => {
   let defaultPage = {};
   let limit = {};
   let page = {};
+  let mockedPassword = {};
+  let successUser = {};
   let token = {};
   let successResponseKeys = {};
   let emptyBodyResponse = {};
@@ -27,18 +27,14 @@ describe('GET /users', () => {
     defaultPage = 1;
     limit = 4;
     page = 2;
+    await resolveComparePasswordMock(true);
+    mockedPassword = await resolveHashPasswordMock('passWord58');
     await factory.createMany('users', 9);
-    await factory.create('users', {
-      password: bcrypt.hash('passWord58', saltRounds),
+    successUser = await factory.create('users', {
+      password: mockedPassword,
       email: 'success.user@wolox.com.ar'
     });
-    token = await request(app)
-      .post('/users/sessions')
-      .send({
-        email: 'success.user@wolox.com.ar',
-        password: 'passWord58'
-      })
-      .then(response => response.body.token);
+    token = 'signed-token';
     successResponseKeys = [
       'page',
       'count',
@@ -50,13 +46,26 @@ describe('GET /users', () => {
       'current_page',
       'next_page'
     ];
+    await succeedJWTVerifyMock({
+      id: successUser.id,
+      firstName: successUser.firstName,
+      lastName: successUser.lastName,
+      admin: successUser.admin
+    });
     emptyBodyResponse = await request(app)
       .get('/users')
       .set('Authorization', token);
+    await succeedJWTVerifyMock({
+      id: successUser.id,
+      firstName: successUser.firstName,
+      lastName: successUser.lastName,
+      admin: successUser.admin
+    });
     successResponse = await request(app)
       .get('/users')
       .set('Authorization', token)
       .query({ limit, page });
+    await failedJWTVerifyMock('Error message');
     unauthorizedResponse = await request(app)
       .get('/users')
       .query({ limit, page });
